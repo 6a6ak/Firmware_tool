@@ -33,8 +33,8 @@ binwalk --extract "$FIRMWARE_FILE" --directory="$EXTRACT_DIR"
 
 # Step 2: Check for SquashFS files
 echo "Step 2: Checking for SquashFS files..."
-SQUASHFS_FILE=$(find "$EXTRACT_DIR" -name "*.squashfs")
-if [ -n "$SQUASHFS_FILE" ]; then
+SQUASHFS_FILE=$(find "$EXTRACT_DIR" -type f -name "*.squashfs")
+if [[ -n "$SQUASHFS_FILE" ]]; then
     echo "Found SquashFS file: $SQUASHFS_FILE"
     echo "Extracting SquashFS..."
     unsquashfs -d "$EXTRACT_DIR/squashfs-root" "$SQUASHFS_FILE"
@@ -44,11 +44,15 @@ fi
 
 # Step 3: Handle LZMA compressed files manually
 echo "Step 3: Checking for LZMA compressed files..."
-for LZMA_FILE in $(find "$EXTRACT_DIR" -name "*.7z" -o -name "*.lzma" -o -name "37C8" -o -name "20200"); do
+
+# Use find with a while-read loop to handle spaces in file names
+find "$EXTRACT_DIR" -type f \( -name "*.7z" -o -name "*.lzma" -o -name "37C8" -o -name "20200" \) | while IFS= read -r LZMA_FILE; do
     echo "Processing LZMA file: $LZMA_FILE"
     if [[ "$LZMA_FILE" == *.7z ]]; then
+        # Extract .7z files using 7z
         7z x "$LZMA_FILE" -o"$EXTRACT_DIR"
     else
+        # Decompress LZMA files
         lzma -d "$LZMA_FILE"
     fi
 done
