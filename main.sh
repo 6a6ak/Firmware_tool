@@ -1,13 +1,15 @@
 #!/bin/bash
 
-# Check if a firmware file is provided as an argument
-if [ "$#" -ne 1 ]; then
-    echo "Usage: $0 <firmware_file>"
+# Prompt the user to enter the firmware file name
+read -p "Enter the firmware file name: " FIRMWARE_FILE
+
+# Check if the input is empty or the file does not exist
+if [[ -z "$FIRMWARE_FILE" || ! -f "$FIRMWARE_FILE" ]]; then
+    echo "Error: Please provide a valid firmware file."
     exit 1
 fi
 
 # Variables
-FIRMWARE_FILE="$1"
 EXTRACT_DIR="extract"
 OUTPUT_FILE="output.txt"
 
